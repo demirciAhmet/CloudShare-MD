@@ -1,32 +1,58 @@
-0. **Generate an .env file**
+## 🚀 Project Setup Guide
 
-`mv .env_example .env
-`
-0. **For changed dependencies**
+### 0. **Create `.env` file**
+```bash
+mv .env_example .env
+```
 
-`npm install
-`
-1. **Generate the Prisma Client**
+### 1. **Install dependencies**
+```bash
+npm install
+```
 
-`npx prisma generate
-`
-2. **Build your docker images**
+### 2. **Generate Prisma Client**
+```bash
+npx prisma generate
+```
 
-`docker compose build
-`
-3. **Create PostgreSQL migrations and apply them**
+### 3. **Build Docker images**
+```bash
+docker compose build
+```
 
-`docker compose run app npx prisma migrate dev --name init
-`
-4. **Boot up docker containers**:
+### 4. **Run DB migrations**
+```bash
+docker compose run app npx prisma migrate dev --name init
+```
 
-`docker compose up
-`
-5. **Remove containers**
+### 5. **Start the app**
+```bash
+docker compose up
+```
 
-`docker compose down
-`
-
-6. **To stop Docker containers**
-
-`docker compose down`
+### 6. **Stop the app**
+```bash
+docker compose down
+```
+## Project Structure:
+```
+├── Dockerfile
+├── README.md
+├── cloudshare-md.rest
+├── docker-compose.yaml
+├── package-lock.json
+├── package.json
+├── prisma
+│   └── schema.prisma
+├── public
+│   ├── index.html
+│   ├── script.js
+│   └── styles.css
+├── src
+│   ├── middleware
+│   │   └── creatorAuthMiddleware.js
+│   ├── routes
+│   │   └── noteRoutes.js
+│   ├── prismaClient.js
+│   └── server.js
+```
