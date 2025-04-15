@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: cloudshare-md
+    environment:
+      - NODE_ENV=development
+      - PORT=5002
+    env_file:
+      - .env
+    ports:
+      - "5002:5002"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

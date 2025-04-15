@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Note {
+  id           Int       @id @default(autoincrement()) // Internal ID
+  uniqueId     String    @unique @default(cuid())     // Publicly shareable ID (e.g., cuid or uuid)
+  content      String?   @db.Text                     // Markdown content (can be large)
+  creatorToken String    @unique @default(cuid())     // Secret token to prove ownership/edit rights
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  expiresAt    DateTime?                              // Optional expiration timestamp
+
+  @@index([uniqueId])
+  @@index([creatorToken]) // Index for quick lookup during edit verification
+  @@index([expiresAt])    // Index to help query for expired notes (optional, for cleanup jobs)
+}

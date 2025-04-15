@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudShare MD - Markdown Sharing</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.0/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar for Recent Notes -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Recent Notes</h3>
+                <div class="sidebar-actions">
+                    <button id="clear-history" class="icon-button" title="Clear History">Clear</button>
+                    <button id="close-sidebar" class="icon-button" title="Close Sidebar">✕</button>
+                </div>
+            </div>
+            <div class="recent-notes" id="recent-notes">
+                <!-- Recent notes will be populated here -->
+                <div class="empty-notes-message">No recent notes</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="app-title">
+                    <button id="toggle-sidebar" class="icon-button" title="Toggle History">☰</button>
+                    <h1>CloudShare MD</h1>
+                </div>
+                <div class="app-controls">
+                    <div id="save-status" class="save-status">Ready</div>
+                    <button id="theme-toggle" class="icon-button" title="Toggle Theme">◐</button>
+                </div>
+            </header>
+
+            <!-- Editor and Preview Area -->
+            <div id="content-area" class="content-area">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-header-left">
+                            <button id="edit-preview-toggle" class="button-group">
+                                <span class="button-group-item active" data-mode="edit">Edit</span>
+                                <span class="button-group-item" data-mode="preview">Preview</span>
+                            </button>
+                        </div>
+                        <div class="panel-header-right">
+                            <button id="new-note-btn" class="button small">New Note</button>
+                            <button id="share-btn" class="button primary small">Share</button>
+                            <button id="copy-markdown-btn" class="button small">Copy Markdown</button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <textarea id="markdown-editor" placeholder="Start typing your Markdown here..."></textarea>
+                        <div id="markdown-preview" class="markdown-body hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for notifications -->
+    <div id="notification-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="notification-close" class="close">&times;</span>
+            <p id="notification-message"></p>
+        </div>
+    </div>
+
+    <!-- Modal for expired content -->
+    <div id="expired-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Note Expired</h3>
+            <p>This note has expired and is no longer available.</p>
+            <button id="expired-ok-btn" class="button primary">OK</button>
+        </div>
+    </div>
+
+    <!-- Share modal -->
+    <div id="share-dropdown" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="close-share">&times;</span>
+            <h3>Share Note</h3>
+            <div class="link-container">
+                <input type="text" id="share-link" readonly>
+                <button id="copy-link-btn" class="button small">Copy</button>
+            </div>
+            <div class="expiration-options">
+                <label>Expires in:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="expiration" value="1h"> 1 hour</label>
+                    <label><input type="radio" name="expiration" value="1d"> 1 day</label>
+                    <label><input type="radio" name="expiration" value="7d"> 7 days</label>
+                    <label><input type="radio" name="expiration" value="none" checked> No expiration</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
