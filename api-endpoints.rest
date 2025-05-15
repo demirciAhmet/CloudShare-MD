@@ -1,0 +1,42 @@
+# ───────────────────────────────────────────────────────────
+#   Core API Endpoints
+# ───────────────────────────────────────────────────────────
+@noteId       = 56
+@uniqueId     = cmapxftvl000ap301re7bbasj
+@creatorToken = cmapxftvl000bp3019vy6ml0d
+
+### Health Check
+GET http://localhost:5002/health
+
+### Create a new note
+POST http://localhost:5002/api/notes
+Content-Type: application/json
+
+{
+  "content": "# My First Note\n\nThis is the initial content."
+}
+
+### Public view
+GET http://localhost:5002/api/notes/{{uniqueId}}
+
+### Get note for editing
+GET http://localhost:5002/api/notes/edit/{{noteId}}
+X-Creator-Token: {{creatorToken}}
+
+### Update note content
+PUT http://localhost:5002/api/notes/{{noteId}}
+Content-Type: application/json
+X-Creator-Token: {{creatorToken}}
+
+{
+  "content": "# My First Note\n\nThis is the updated content."
+}
+
+### Set expiration (1 day)
+PUT http://localhost:5002/api/notes/{{noteId}}/config
+Content-Type: application/json
+X-Creator-Token: {{creatorToken}}
+
+{
+  "expirationOption": "1d"
+}

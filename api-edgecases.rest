@@ -1,0 +1,60 @@
+# ───────────────────────────────────────────────────────────
+#   Edge-Case & Validation Tests
+# ───────────────────────────────────────────────────────────
+@noteId        = 56
+@creatorToken  = cmapxftvl000bp3019vy6ml0d
+@fakeUniqueId  = does-not-exist-123
+@expiredUid    = EXPIRED_UNIQUE_ID_HERE
+@invalidId     = foobar
+
+### Update (missing content)
+PUT http://localhost:5002/api/notes/{{noteId}}
+Content-Type: application/json
+X-Creator-Token: {{creatorToken}}
+
+{}
+
+### Update (wrong token)
+PUT http://localhost:5002/api/notes/{{noteId}}
+Content-Type: application/json
+X-Creator-Token: wrong-token-123
+
+{
+  "content": "Trying to edit with wrong token"
+}
+
+### Update (no token)
+PUT http://localhost:5002/api/notes/{{noteId}}
+Content-Type: application/json
+
+{
+  "content": "Trying to edit without token"
+}
+
+### Public view (not found)
+GET http://localhost:5002/api/notes/{{fakeUniqueId}}
+
+### Public view (expired note)
+GET http://localhost:5002/api/notes/{{expiredUid}}
+
+### Get edit (invalid ID format)
+GET http://localhost:5002/api/notes/edit/{{invalidId}}
+X-Creator-Token: {{creatorToken}}
+
+### Set expiration (invalid option)
+PUT http://localhost:5002/api/notes/{{noteId}}/config
+Content-Type: application/json
+X-Creator-Token: {{creatorToken}}
+
+{
+  "expirationOption": "not-valid"
+}
+
+### SPA catch-all routing
+GET http://localhost:5002/some/random/frontend/route
+
+### Static asset (exists)
+GET http://localhost:5002/main.js
+
+### Static asset (missing)
+GET http://localhost:5002/does-not-exist.js
