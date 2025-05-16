@@ -37,16 +37,28 @@ docker compose down
 ## Project Structure:
 ```
 ├── Dockerfile
-├── README.md
-├── cloudshare-md.rest
 ├── docker-compose.yaml
-├── package-lock.json
+├── README.md
+├── api-endpoints.rest
+├── api-edgecases.rest
 ├── package.json
+├── package-lock.json
 ├── prisma
 │   └── schema.prisma
 ├── public
 │   ├── index.html
-│   ├── script.js
+│   ├── js
+│   │   ├── api.js
+│   │   ├── app.js
+│   │   ├── config.js
+│   │   ├── dom.js
+│   │   ├── editor.js
+│   │   ├── eventHandlers.js
+│   │   ├── eventListeners.js
+│   │   ├── noteManager.js
+│   │   ├── state.js
+│   │   ├── ui.js
+│   │   └── utils.js
 │   └── styles.css
 ├── src
 │   ├── middleware

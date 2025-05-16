@@ -1,21 +1,34 @@
 {
   "name": "cloudshare-md",
   "version": "1.0.0",
+  "description": "Cloud-based Markdown note sharing application",
+  "keywords": [],
+  "homepage": "https://github.com/demirciAhmet/CloudShare-MD#readme",
+  "bugs": {
+    "url": "https://github.com/demirciAhmet/CloudShare-MD/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demirciAhmet/CloudShare-MD.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch --env-file=.env ./src/server.js",
     "start": "node ./src/server.js",
+    "build": "npx prisma generate",
+    "migrate:dev": "npx prisma migrate dev",
+    "migrate:deploy": "npx prisma migrate deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "description": "Cloud-based Markdown note sharing application",
   "dependencies": {
-    "@prisma/client": "^6.3.0", 
-    "express": "^4.21.2",  
-    "pg": "^8.13.1",          
-    "prisma": "^6.3.0"    
+    "@prisma/client": "^6.3.0",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.3.0"
   }
 }

@@ -1,8 +1,13 @@
+.git
+.vscode
 node_modules
 npm-debug.log
+*.md
 .env
-.git
-.gitignore
-README.md
-.dockerignore
-docker-compose* 
+.env.*
+!public/.env # If you have a specific .env for public assets, adjust accordingly or remove if not needed
+Dockerfile
+docker-compose.yaml
+# Add any other files/directories you want to ignore
+# For example, local test reports, IDE specific files etc.
+# .DS_Store (if on macOS)

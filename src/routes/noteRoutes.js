@@ -10,6 +10,7 @@ router.get('/:uniqueId', async (req, res) => {
         const note = await prisma.note.findUnique({
             where: { uniqueId: uniqueId },
             select: {
+                id: true,
                 content: true,
                 updatedAt: true,
                 expiresAt: true
@@ -27,7 +28,12 @@ router.get('/:uniqueId', async (req, res) => {
              });
         }
 
-        res.json({ content: note.content || '', updatedAt: note.updatedAt });
+        res.json({
+            id: note.id,
+            content: note.content || '',
+            updatedAt: note.updatedAt,
+            expiresAt: note.expiresAt
+        });
 
     } catch (error) {
         console.error("Error fetching note for view:", error);
