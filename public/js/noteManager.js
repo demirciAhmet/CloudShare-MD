@@ -2,7 +2,7 @@ import * as State from './state.js';
 import * as UI from './ui.js';
 import * as API from './api.js';
 import * as Editor from './editor.js';
-import { extractTitleFromContent, debounce } from './utils.js';
+import { getTitleFromContent, debounce } from './utils.js';
 import * as DOM from './dom.js'; // For editor value access
 
 let debouncedSaveNoteChanges;
@@ -22,7 +22,7 @@ export function initializeNoteManager() {
         } else {
             State.updateState({ lastSavedContent: content });
             UI.setSaveStatusDisplay('saved');
-            updateRecentNote(currentNoteId, extractTitleFromContent(content));
+            updateRecentNote(currentNoteId, getTitleFromContent(content));
         }
     }, State.getState().saveInterval);
 }
@@ -76,7 +76,7 @@ export async function saveNewNote() {
     State.storeNoteTokenInStorage(id, creatorToken);
     history.pushState({}, '', `/?edit=${id}`);
     addNoteToRecentList({
-        id, uniqueId, title: extractTitleFromContent(content),
+        id, uniqueId, title: getTitleFromContent(content),
         updatedAt: new Date().toISOString(), viewOnly: false
     });
     UI.setSaveStatusDisplay('saved');
@@ -109,7 +109,7 @@ async function loadNoteForViewingFlow(uniqueId) {
     UI.setEditorPreviewMode(isCreator ? 'edit' : 'preview', Editor.updateMarkdownPreview);
     addNoteToRecentList({
         id: isCreator ? noteIdFromServer : null, uniqueId,
-        title: extractTitleFromContent(content), updatedAt, viewOnly: !isCreator
+        title: getTitleFromContent(content), updatedAt, viewOnly: !isCreator
     });
 }
 
@@ -133,7 +133,7 @@ async function loadNoteForEditingFlow(noteId, token) {
     UI.setEditorPreviewMode('edit', Editor.updateMarkdownPreview);
     UI.setExpirationRadioUI(expiresAt);
     addNoteToRecentList({
-        id: noteId, uniqueId, title: extractTitleFromContent(content),
+        id: noteId, uniqueId, title: getTitleFromContent(content),
         updatedAt, viewOnly: false
     });
 }
@@ -216,7 +216,7 @@ export async function triggerManualSave() {
         } else {
             State.updateState({ lastSavedContent: content });
             UI.setSaveStatusDisplay('saved');
-            updateRecentNote(currentNoteId, extractTitleFromContent(content));
+            updateRecentNote(currentNoteId, getTitleFromContent(content));
         }
     }
 }
