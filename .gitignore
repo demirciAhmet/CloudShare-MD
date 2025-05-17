@@ -1,3 +1,5 @@
 .env
+.env_development
+.env_production
 node_modules
 migrations

@@ -1,28 +1,28 @@
 services:
   app:
     build: .
-    container_name: cloudshare-md_dev
-    user: "${CURRENT_UID}:${CURRENT_GID}"
-    command: npm run dev
+    container_name: cloudshare-md_prod
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=5002
     env_file:
-      - .env_development
+      - .env_production
     ports:
       - "5002:5002"
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app                # Mount current host directory to /app for live code changes
-      - /app/node_modules     # Use node_modules from the image, not the host
+    restart: always
+    entrypoint: ["./entrypoint.sh"]
+    command: ["node", "./src/server.js"]
+    mem_limit: 512m
+    cpu_shares: 512
 
   db:
     image: postgres:16-alpine
-    container_name: postgres-db_dev
+    container_name: postgres-db_prod
     env_file:
-      - .env_development
+      - .env_production
     ports:
       - "5433:5432"
     volumes:
@@ -32,6 +32,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
 
 volumes:
   postgres-data:

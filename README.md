@@ -1,40 +1,84 @@
-## 🚀 Project Setup Guide
+# 🚀 Project Setup Guide (DEVELOPMENT)
 
-### 0. **Create `.env` file**
+## **Setup**
+
+#### -1. **Edit the `.env` file**
 ```bash
-mv .env_example .env
+vim .env_example
 ```
 
-### 1. **Install dependencies**
+#### 0. **Generate `.env` file**
 ```bash
-npm install
+mv .env_example .env_development
 ```
 
-### 2. **Generate Prisma Client**
+#### 1. **Build Docker images**
 ```bash
-npx prisma generate
+docker compose build --no-cache app
 ```
 
-### 3. **Build Docker images**
+#### 2. **Run DB migrations**
 ```bash
-docker compose build
+docker compose run --rm app npx prisma migrate dev --name init
 ```
 
-### 4. **Run DB migrations**
+#### 3. **Start the app**
 ```bash
-docker compose run app npx prisma migrate dev --name init
+docker compose up --remove-orphans
 ```
 
-### 5. **Start the app**
+#### 5. **Stop the app**
 ```bash
-docker compose up
+docker compose down -v
 ```
 
-### 6. **Stop the app**
+## **Debugging (for a running app)**
+
+#### 1. **(Debugging) For Subsequent Schema Changes**
+
 ```bash
-docker compose down
+docker-compose exec app npx prisma migrate dev
 ```
+
+#### 2. **(Debugging) Query The Database**
+
+```bash
+docker exec -it postgres-db_dev psql -U postgres -d cloudshare_dev
+```
+
+#### 3. **Database Queries**
+
+```sql
+-- list tables 
+cloudshare_dev=# \dt
+```
+
+```sql
+-- describe the Note table
+cloudshare_dev=# \d "Note"
+```
+
+```sql
+-- select everything
+cloudshare_dev=# SELECT * FROM "Note" LIMIT 10;
+```
+
+```sql
+cloudshare_dev=# SELECT content, created_at
+               FROM "Note"
+               WHERE expires_at IS NULL
+               ORDER BY created_at DESC;
+```
+
+```sql
+-- quit
+\q
+```
+
 ## Project Structure:
+
+(May need update)
+
 ```
 ├── Dockerfile
 ├── docker-compose.yaml

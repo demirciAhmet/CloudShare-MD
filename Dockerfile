@@ -5,7 +5,6 @@ WORKDIR /app
 
 # Copy package files and install dependencies (including devDependencies for build)
 COPY package*.json ./
-
 COPY prisma/schema.prisma ./prisma/schema.prisma
 RUN npm install
 RUN npm run build
@@ -27,11 +26,11 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/prisma ./prisma 
-# Schema needed for runtime if $queryRaw, etc. are used extensively, or for migrations
-# If only @prisma/client is used, and migrations run separately, this might be skippable.
-# For safety and to support potential raw queries or future needs, let's keep it.
-# Crucial: Copy the generated Prisma client
 COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client 
+
+# Copy the entrypoint script
+COPY entrypoint.sh .
+RUN chmod +x ./entrypoint.sh
 
 # Ensure all files are owned by the non-root user
 RUN chown -R appuser:appgroup /app
@@ -42,5 +41,4 @@ USER appuser
 # Use PORT from env, default to 5002
 EXPOSE ${PORT:-5002} 
 
-# This command will be used to run the application
 CMD ["node", "./src/server.js"]
