@@ -196,6 +196,8 @@ describe('Application State Management', () => {
             }, 10)); // 10ms delay
         });
 
+        // Test for updating by uniqueId
+
         test('removeNoteFromHistoryInState should remove a note by id', () => {
             State.addOrUpdateRecentNoteInState(note1);
             State.addOrUpdateRecentNoteInState(note2);

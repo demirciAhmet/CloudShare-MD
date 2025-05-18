@@ -81,11 +81,16 @@ export function addOrUpdateRecentNoteInState(note) {
     localStorage.setItem('recent_notes', JSON.stringify(notes));
 }
 
-export function updateRecentNoteTitleInState(noteId, newTitle) {
-    const noteIndex = appState.recentNotes.findIndex(note => note.id === noteId);
+export function updateRecentNoteTitleInState(noteId, newTitle, uniqueIdToMatch) {
+    const noteIndex = appState.recentNotes.findIndex(note =>
+        (note.id && note.id === noteId) || (note.uniqueId && note.uniqueId === uniqueIdToMatch)
+    );
     if (noteIndex !== -1) {
         appState.recentNotes[noteIndex].title = newTitle;
         appState.recentNotes[noteIndex].updatedAt = new Date().toISOString();
+
+        const [updatedNote] = appState.recentNotes.splice(noteIndex, 1);
+        appState.recentNotes.unshift(updatedNote);
         localStorage.setItem('recent_notes', JSON.stringify(appState.recentNotes));
     }
 }
