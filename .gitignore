@@ -3,3 +3,4 @@
 .env_production
 node_modules
 migrations
+prisma/migrations
