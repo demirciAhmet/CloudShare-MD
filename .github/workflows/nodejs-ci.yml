@@ -102,10 +102,10 @@ jobs:
       - name: Run smoke tests
         run: |
           echo "Starting services for smoke test..."
-          docker-compose -f docker-compose.smoke-test.yml up -d --wait 
+          docker compose -f docker-compose.smoke-test.yml up -d --wait 
           # --wait ensures services are healthy/running before proceeding (Docker Compose v2.3.0+)
           # If --wait is not available or reliable, use a loop with sleep and curl:
-          # docker-compose -f docker-compose.smoke-test.yml up -d
+          # docker compose -f docker-compose.smoke-test.yml up -d
           # echo "Waiting for application to be ready..."
           # for i in {1..20}; do curl -sf http://localhost:5002/health && break || sleep 3; done
           # curl -sf http://localhost:5002/health # Final check, fails the job if non-zero exit
@@ -117,7 +117,7 @@ jobs:
       - name: Clean up smoke test environment
         if: always() # Ensure cleanup happens even if smoke tests fail
         run: |
-          docker-compose -f docker-compose.smoke-test.yml down -v
+          docker compose -f docker-compose.smoke-test.yml down -v
           rm docker-compose.smoke-test.yml
 
       # This step will only run if all previous steps (including smoke test) passed
