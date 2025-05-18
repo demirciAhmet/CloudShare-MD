@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js CI and Docker Build
 
 on:
   push:
@@ -7,25 +7,136 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-
+        node-version: [22.x]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-        
-      - name: Run tests
+      - name: Run tests (with mock DB)
         run: npm test
+
+  build_smoke_and_push_docker_image:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          tags: |
+            type=sha,prefix=
+            latest
+
+      - name: Build Docker image locally
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create docker-compose.smoke-test.yml
+        run: |
+          cat <<EOF > docker-compose.smoke-test.yml
+          services:
+            app:
+              image: ${{ steps.meta.outputs.tags }} # Use one of the tags from the build step (e.g., the SHA tag)
+              container_name: cloudshare-smoke-app
+              environment:
+                - NODE_ENV=production
+                - PORT=5002
+                - POSTGRES_USER=smoke_user
+                - POSTGRES_PASSWORD=smoke_password
+                - POSTGRES_DB=smoke_db
+                - DATABASE_URL=postgresql://smoke_user:smoke_password@db-smoke:5432/smoke_db?schema=public
+              ports:
+                - "5002:5002"
+              depends_on:
+                db-smoke:
+                  condition: service_healthy
+              # entrypoint and command are from the Docker image itself
+
+            db-smoke:
+              image: postgres:16-alpine
+              container_name: postgres-smoke-db
+              environment:
+                - POSTGRES_USER=smoke_user
+                - POSTGRES_PASSWORD=smoke_password
+                - POSTGRES_DB=smoke_db
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U \$${POSTGRES_USER} -d \$${POSTGRES_DB}"]
+                interval: 5s
+                timeout: 5s
+                retries: 5
+              restart: always # Good for the smoke test db
+          EOF
+
+      - name: Run smoke tests
+        run: |
+          echo "Starting services for smoke test..."
+          docker-compose -f docker-compose.smoke-test.yml up -d --wait 
+          # --wait ensures services are healthy/running before proceeding (Docker Compose v2.3.0+)
+          # If --wait is not available or reliable, use a loop with sleep and curl:
+          # docker-compose -f docker-compose.smoke-test.yml up -d
+          # echo "Waiting for application to be ready..."
+          # for i in {1..20}; do curl -sf http://localhost:5002/health && break || sleep 3; done
+          # curl -sf http://localhost:5002/health # Final check, fails the job if non-zero exit
+
+          echo "Checking health endpoint..."
+          curl --retry 5 --retry-delay 3 --retry-connrefused -sf http://localhost:5002/health
+          echo "Smoke test passed!"
+
+      - name: Clean up smoke test environment
+        if: always() # Ensure cleanup happens even if smoke tests fail
+        run: |
+          docker-compose -f docker-compose.smoke-test.yml down -v
+          rm docker-compose.smoke-test.yml
+
+      # This step will only run if all previous steps (including smoke test) passed
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Re-specify context, or just use docker push
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true # Now push the image
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Caching should still work from the earlier build step
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
