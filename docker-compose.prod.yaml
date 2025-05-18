@@ -1,6 +1,7 @@
 services:
   app:
-    build: .
+    # build: .
+    image: cloudshare-md-manual-test:latest
     container_name: cloudshare-md_prod
     environment:
       - NODE_ENV=production
