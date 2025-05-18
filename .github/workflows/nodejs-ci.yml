@@ -68,7 +68,7 @@ jobs:
           cat <<EOF > docker-compose.smoke-test.yml
           services:
             app:
-              image: ${{ steps.meta.outputs.tags }} # Use one of the tags from the build step (e.g., the SHA tag)
+              image: $(echo "${{ steps.meta.outputs.tags }}" | head -n 1) # Use the first tag from the build step
               container_name: cloudshare-smoke-app
               environment:
                 - NODE_ENV=production
