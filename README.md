@@ -32,6 +32,12 @@ docker compose up --remove-orphans
 docker compose down -v
 ```
 
+## **Testing**
+
+```bash
+npm test
+```
+
 ## **Debugging (for a running app)**
 
 #### 1. **(Debugging) For Subsequent Schema Changes**

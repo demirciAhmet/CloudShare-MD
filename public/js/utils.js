@@ -1,17 +1,23 @@
 export function getTitleFromContent(content) {
-    if (!content) return 'Untitled Note';
 
-    const firstLine = content
-        .split('\n')[0]
-        .trim();
+    if (!content || content.trim() === '') {
+        return 'Untitled Note';
+    }
 
     const headingMatch = content.match(/^# (.+)$/m);
+    if (headingMatch && headingMatch[1] && headingMatch[1].trim()) {
+        return headingMatch[1].trim();
+    }
 
-    return headingMatch
-        ? headingMatch[1]
-        : firstLine.length > 30
-            ? `${firstLine.substring(0, 30)}...`
-            : firstLine;
+    const firstLine = content.split('\n')[0].trim();
+
+    if (!firstLine) {
+        return 'Untitled Note';
+    }
+
+    return firstLine.length > 30
+        ? `${firstLine.substring(0, 30)}...`
+        : firstLine;
 }
 
 export function getExpirationTextForDisplay(expirationOption) {

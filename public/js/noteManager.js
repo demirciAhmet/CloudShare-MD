@@ -1,19 +1,24 @@
+// public/js/noteManager.js
+import * as self from './noteManager.js'; // Import self for spied internal calls
 import * as State from './state.js';
 import * as UI from './ui.js';
 import * as API from './api.js';
 import * as Editor from './editor.js';
 import { getTitleFromContent, debounce } from './utils.js';
-import * as DOM from './dom.js'; // For editor value access
+import * as DOM from './dom.js';
 
 let debouncedSaveNoteChanges;
 
 export function initializeNoteManager() {
     debouncedSaveNoteChanges = debounce(async () => {
-        const { currentNoteId, creatorToken, content, lastSavedContent } = State.getState();
-        if (!currentNoteId || !creatorToken || content === lastSavedContent) {
-            if (content === lastSavedContent) UI.setSaveStatusDisplay('saved');
+        const { currentNoteId, creatorToken, content, lastSavedContent, uniqueId } = State.getState();
+        if (!currentNoteId || !creatorToken) return; // No need to proceed if no active note/creator
+
+        if (content === lastSavedContent) {
+            UI.setSaveStatusDisplay('saved');
             return;
         }
+
         UI.setSaveStatusDisplay('saving');
         const result = await API.saveNoteChangesAPI(currentNoteId, content, creatorToken);
         if (result.error) {
@@ -22,7 +27,9 @@ export function initializeNoteManager() {
         } else {
             State.updateState({ lastSavedContent: content });
             UI.setSaveStatusDisplay('saved');
-            updateRecentNote(currentNoteId, getTitleFromContent(content));
+            if (uniqueId && currentNoteId) { // Ensure uniqueId and currentNoteId are present
+                updateRecentNote(currentNoteId, getTitleFromContent(content), uniqueId);
+            }
         }
     }, State.getState().saveInterval);
 }
@@ -84,8 +91,8 @@ export async function saveNewNote() {
     return result.data;
 }
 
-async function loadNoteForViewingFlow(uniqueId) {
-    const result = await API.loadNoteForViewingAPI(uniqueId);
+async function loadNoteForViewingFlow(uniqueIdParam) { // Renamed param to avoid conflict
+    const result = await API.loadNoteForViewingAPI(uniqueIdParam);
     if (result.error) {
         if (result.error === 'expired') UI.showExpiredModal();
         else UI.showNotification(`Failed to load note: ${result.error}`);
@@ -96,7 +103,7 @@ async function loadNoteForViewingFlow(uniqueId) {
     const isCreator = !!storedToken;
 
     State.updateState({
-        content, uniqueId,
+        content, uniqueId: uniqueIdParam, // Use the passed uniqueIdParam
         currentNoteId: isCreator ? noteIdFromServer : null,
         creatorToken: isCreator ? storedToken : null,
         isCreator, isNewNote: false, lastSavedContent: content
@@ -108,17 +115,17 @@ async function loadNoteForViewingFlow(uniqueId) {
     UI.setExpirationRadioUI(expiresAt);
     UI.setEditorPreviewMode(isCreator ? 'edit' : 'preview', Editor.updateMarkdownPreview);
     addNoteToRecentList({
-        id: isCreator ? noteIdFromServer : null, uniqueId,
+        id: isCreator ? noteIdFromServer : null, uniqueId: uniqueIdParam,
         title: getTitleFromContent(content), updatedAt, viewOnly: !isCreator
     });
 }
 
-async function loadNoteForEditingFlow(noteId, token) {
+async function loadNoteForEditingFlow(noteId, token) { // This is an internal helper
     const result = await API.loadNoteForEditingAPI(noteId, token);
     if (result.error) {
         if (result.error === 'expired') UI.showExpiredModal();
         else UI.showNotification(`Failed to load note for editing: ${result.error}`);
-        createNewNoteFlow(); // Fallback
+        self.createNewNoteFlow(); // MODIFIED: Use self
         return;
     }
     const { uniqueId, content, updatedAt, expiresAt } = result.data;
@@ -152,9 +159,9 @@ export async function initializeAppContent() {
         if (token) await loadNoteForEditingFlow(editId, token);
         else {
             UI.showNotification('Creator token not found. Opening as new note.');
-            createNewNoteFlow();
+            self.createNewNoteFlow(); // MODIFIED: Use self
         }
-    } else createNewNoteFlow();
+    } else self.createNewNoteFlow(); // MODIFIED: Use self
 }
 
 export async function updateNoteExpirationSetting(expirationOption) {
@@ -170,8 +177,9 @@ function addNoteToRecentList(note) {
     refreshRecentNotesDisplay();
 }
 
-function updateRecentNote(noteId, newTitle) {
-    State.updateRecentNoteTitleInState(noteId, newTitle);
+// Modified updateRecentNote to accept uniqueId
+function updateRecentNote(noteId, newTitle, uniqueId) {
+    State.updateRecentNoteTitleInState(noteId, newTitle, uniqueId); // Pass uniqueId
     refreshRecentNotesDisplay();
 }
 
@@ -191,6 +199,8 @@ export function clearAllRecentHistory() {
 
 function refreshRecentNotesDisplay() {
     const notes = State.getState().recentNotes;
+    // If removeNoteFromRecentList is spied on, this call should also use self.
+    // For now, assuming it's not the one causing spy issues.
     UI.renderRecentNotesList(notes, handleRecentNoteItemClick, removeNoteFromRecentList);
 }
 
@@ -200,9 +210,9 @@ function handleRecentNoteItemClick(note) {
 }
 
 export async function triggerManualSave() {
-    const { isNewNote, content, isCreator, currentNoteId, creatorToken, lastSavedContent } = State.getState();
+    const { isNewNote, content, isCreator, currentNoteId, creatorToken, lastSavedContent, uniqueId } = State.getState();
     if (isNewNote && content.trim()) {
-        await saveNewNote();
+        await self.saveNewNote(); // MODIFIED: Use self
     } else if (!isNewNote && isCreator) {
         if (content === lastSavedContent) {
             UI.setSaveStatusDisplay('saved');
@@ -216,7 +226,9 @@ export async function triggerManualSave() {
         } else {
             State.updateState({ lastSavedContent: content });
             UI.setSaveStatusDisplay('saved');
-            updateRecentNote(currentNoteId, getTitleFromContent(content));
+            if (uniqueId && currentNoteId) { // Ensure uniqueId and currentNoteId are present
+                updateRecentNote(currentNoteId, getTitleFromContent(content), uniqueId);
+            }
         }
     }
 }

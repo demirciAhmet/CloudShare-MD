@@ -33,13 +33,27 @@ export function onWindowClick(e) {
     if (e.target === DOM.notificationModal) UI.closeNotification();
 }
 
-export function onDocumentKeydown(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); NoteManager.triggerManualSave(); }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); UI.toggleThemeOnPage(); }
-    if (e.key === 'Escape') {
-        if (!DOM.shareDropdown.classList.contains('hidden')) UI.closeShareDropdown();
-        if (!DOM.notificationModal.classList.contains('hidden')) UI.closeNotification();
-        if (!DOM.sidebar.classList.contains('collapsed')) UI.closeSidebar();
+export function onDocumentKeydown(event) {
+    const isCtrlOrMeta = event.ctrlKey || event.metaKey;
+
+    if (isCtrlOrMeta && event.key === 's') {
+        event.preventDefault();
+        console.log('Ctrl/Cmd + S pressed');
+        NoteManager.triggerManualSave();
+    } else if (isCtrlOrMeta && event.key === 'd') {
+        event.preventDefault();
+        console.log('Ctrl/Cmd + D pressed');
+        UI.toggleThemeOnPage();
+    } else if (event.key === 'Escape') {
+        if (DOM.shareDropdown && !DOM.shareDropdown.classList.contains('hidden')) {
+            UI.closeShareDropdown();
+        }
+        else if (DOM.notificationModal && !DOM.notificationModal.classList.contains('hidden')) {
+            UI.closeNotification();
+        }
+        else if (DOM.sidebar && !DOM.sidebar.classList.contains('hidden')) {
+            UI.closeSidebar();
+        }
     }
 }
 // Note: Markdown editor input is handled by NoteManager.handleEditorContentChange

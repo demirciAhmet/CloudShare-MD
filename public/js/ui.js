@@ -1,6 +1,10 @@
+// public/js/ui.js
 import * as DOM from './dom.js';
 import { getState, setThemeState } from './state.js'; // For theme state
 import { getExpirationTextForDisplay } from './utils.js';
+
+// Import all exports from this module itself under an alias (e.g., 'self' or 'uiInternal')
+import * as self from './ui.js'; // <--- Key change for testability
 
 let notificationTimeoutId;
 
@@ -29,11 +33,17 @@ export function showNotification(message) {
     DOM.notificationMessage.textContent = message;
     DOM.notificationModal.classList.remove('hidden');
     if (notificationTimeoutId) clearTimeout(notificationTimeoutId);
-    notificationTimeoutId = setTimeout(closeNotification, 3000);
+    // Call the exported version via 'self'
+    notificationTimeoutId = setTimeout(() => self.closeNotification(), 3000); // <--- MODIFIED
 }
 
 export function closeNotification() {
     DOM.notificationModal.classList.add('hidden');
+    // If you also wanted to ensure the timeout ID is cleared here when called directly:
+    // if (notificationTimeoutId) {
+    //     clearTimeout(notificationTimeoutId);
+    //     notificationTimeoutId = null;
+    // }
 }
 
 export function showExpiredModal() {
@@ -60,10 +70,13 @@ export async function copyTextToClipboard(text, buttonElement, successText = 'Co
     try {
         await navigator.clipboard.writeText(text);
         buttonElement.textContent = successText;
+        // Consider if this success notification should also be spied upon:
+        // self.showNotification('Text copied successfully!'); 
         setTimeout(() => { buttonElement.textContent = originalText; }, 2000);
     } catch (err) {
         console.error('Failed to copy text: ', err);
-        showNotification('Failed to copy. Please copy manually.');
+        // Call the exported version via 'self'
+        self.showNotification('Failed to copy. Please copy manually.'); // <--- MODIFIED
     }
 }
 
@@ -77,7 +90,7 @@ export function toggleThemeOnPage() {
     let currentTheme = getState().theme;
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     setThemeState(newTheme); // Update state and localStorage
-    applyThemeToPage(); // Update DOM
+    self.applyThemeToPage(); // Call via 'self' if you ever need to spy on applyThemeToPage
 }
 
 export function setEditorPreviewMode(mode, updatePreviewCallback) {
@@ -92,7 +105,7 @@ export function setEditorPreviewMode(mode, updatePreviewCallback) {
     if (isEditMode) {
         DOM.markdownEditor.focus();
     } else {
-        updatePreviewCallback(); // Ensure preview is up-to-date when switching
+        updatePreviewCallback();
     }
 }
 
@@ -143,7 +156,6 @@ export function setEditorDisabledUI(isDisabled) {
 export function setEditorValue(content) {
     DOM.markdownEditor.value = content;
 }
-
 export function setExpirationRadioUI(expiresAt) {
     let selectedValue = 'none';
     if (expiresAt) {
@@ -156,7 +168,24 @@ export function setExpirationRadioUI(expiresAt) {
         else if (diffHours <= 24) selectedValue = '1d';
         else selectedValue = '7d';
     }
-    const radio = DOM.expirationRadios().find(r => r.value === selectedValue);
-    if (radio) radio.checked = true;
-    else DOM.expirationRadios().find(r => r.value === 'none').checked = true; // Default
+
+    const radios = DOM.expirationRadios();
+    
+    // Uncheck all radios first
+    radios.forEach(r => r.checked = false);
+
+    const radioToSelect = radios.find(r => r.value === selectedValue);
+
+    if (radioToSelect) {
+        radioToSelect.checked = true;
+    } else {
+        const noneRadio = radios.find(r => r.value === 'none');
+        if (noneRadio) {
+            noneRadio.checked = true;
+        } else {
+            // If even the 'none' radio is not found (e.g., radios array is empty or misconfigured)
+            // throw an error as per the test expectation.
+            throw new Error("Cannot set expiration UI: 'none' radio button not found as a fallback."); // <--- MODIFIED
+        }
+    }
 }

@@ -1,9 +1,9 @@
 # ───────────────────────────────────────────────────────────
 #   Core API Endpoints
 # ───────────────────────────────────────────────────────────
-@noteId       = 56
-@uniqueId     = cmapxftvl000ap301re7bbasj
-@creatorToken = cmapxftvl000bp3019vy6ml0d
+@noteId       = 2
+@uniqueId     = cmasonbav0002lf01d6f2c51p
+@creatorToken = cmasonbav0003lf01m4ujmikk
 
 ### Health Check
 GET http://localhost:5002/health
