@@ -38,7 +38,4 @@ RUN chown -R appuser:appgroup /app
 # Switch to the non-root user
 USER appuser
 
-# Use PORT from env, default to 5002
-EXPOSE ${PORT:-5002} 
-
 CMD ["node", "./src/server.js"]
