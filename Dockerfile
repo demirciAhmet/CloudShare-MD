@@ -39,6 +39,6 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Use PORT from env, default to 5002
-EXPOSE ${PORT:-5002} 
+EXPOSE ${PORT} 
 
 CMD ["node", "./src/server.js"]

@@ -5,7 +5,8 @@ import noteRoutes from './routes/noteRoutes.js';
 import prisma from './prismaClient.js';
 
 const app = express();
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,8 +41,9 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => { // Store server instance
-    console.log(`CloudShare MD Server has started listening on http://0.0.0.0:${PORT}`);
+const server = app.listen(PORT, () => { // Store server instance
+    console.log(`CloudShare MD Server has started listening on http://${HOST}:${PORT}`);
+
 });
 
 // Graceful shutdown logic
