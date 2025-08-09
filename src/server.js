@@ -43,6 +43,7 @@ app.get('*', (req, res) => {
 
 const server = app.listen(PORT, () => { // Store server instance
     console.log(`CloudShare MD Server has started listening on http://${HOST}:${PORT}`);
+
 });
 
 // Graceful shutdown logic
