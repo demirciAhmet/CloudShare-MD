@@ -6,11 +6,11 @@ services:
     command: npm run dev
     environment:
       - NODE_ENV=development
-      - PORT=5002
+      - PORT=3000
     env_file:
       - .env_development
     ports:
-      - "5002:5002"
+      - "8080:3000"
     depends_on:
       db:
         condition: service_healthy

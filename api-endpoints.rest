@@ -6,10 +6,10 @@
 @creatorToken = cmasonbav0003lf01m4ujmikk
 
 ### Health Check
-GET http://localhost:5002/health
+GET http://localhost:8080/health
 
 ### Create a new note
-POST http://localhost:5002/api/notes
+POST http://localhost:8080/api/notes
 Content-Type: application/json
 
 {
@@ -17,14 +17,14 @@ Content-Type: application/json
 }
 
 ### Public view
-GET http://localhost:5002/api/notes/{{uniqueId}}
+GET http://localhost:8080/api/notes/{{uniqueId}}
 
 ### Get note for editing
-GET http://localhost:5002/api/notes/edit/{{noteId}}
+GET http://localhost:8080/api/notes/edit/{{noteId}}
 X-Creator-Token: {{creatorToken}}
 
 ### Update note content
-PUT http://localhost:5002/api/notes/{{noteId}}
+PUT http://localhost:8080/api/notes/{{noteId}}
 Content-Type: application/json
 X-Creator-Token: {{creatorToken}}
 
@@ -33,7 +33,7 @@ X-Creator-Token: {{creatorToken}}
 }
 
 ### Set expiration (1 day)
-PUT http://localhost:5002/api/notes/{{noteId}}/config
+PUT http://localhost:8080/api/notes/{{noteId}}/config
 Content-Type: application/json
 X-Creator-Token: {{creatorToken}}
 
