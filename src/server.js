@@ -40,8 +40,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
-const server = app.listen(PORT, () => { // Store server instance
-    console.log(`CloudShare MD Server has started on http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => { // Store server instance
+    console.log(`CloudShare MD Server has started listening on http://0.0.0.0:${PORT}`);
 });
 
 // Graceful shutdown logic
